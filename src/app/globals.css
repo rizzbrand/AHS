@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #efeae2;
+  color: #1c1915;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #f3e6dc;
+  color: #1c1915;
+}
+
+:focus-visible {
+  outline: 2px solid #8c4520;
+  outline-offset: 2px;
+}
+
+/* Console canvas: soften the bordered panels, controls, and table wrappers used across pages. */
+.console-canvas :where(.border.border-line) {
+  border-radius: 10px;
+}
+
+.console-canvas :where(.border.border-line) > :where(.overflow-x-auto, .overflow-auto) {
+  border-radius: inherit;
+}
+
+.console-canvas :where(.border.border-line) > :where(:first-child:is(div, header, p)) {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+.console-canvas :where(.border.border-line) > :where(:last-child:is(div, footer, p)) {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
+.console-canvas ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.console-canvas ::-webkit-scrollbar-thumb {
+  background: #e2d9cc;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.font-display {
+  letter-spacing: -0.03em;
+  font-weight: 500;
+}
