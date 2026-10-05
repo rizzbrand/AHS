@@ -139,6 +139,16 @@ export type Contractor = {
   history: JobEvent[];
 };
 
+export type ContractorApplication = {
+  company: string;
+  contactName: string;
+  phone: string;
+  email: string;
+  trades: ServiceType[];
+  serviceArea: string;
+  notes?: string;
+};
+
 export type ChecklistItem = { id: string; label: string; done: boolean };
 
 export type JobNote = { id: string; at: string; author: string; body: string };

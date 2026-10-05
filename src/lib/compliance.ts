@@ -8,7 +8,7 @@ export const EXPIRY_WINDOW_DAYS = 30;
 
 export const ONBOARDING: ContractorStatus[] = ['application', 'review', 'document_verification', 'approved', 'active'];
 
-const REQUIRED: { category: JobDocument['category']; label: string }[] = [
+export const REQUIRED_PAPERS: { category: JobDocument['category']; label: string }[] = [
   { category: 'license', label: 'Contractor license' },
   { category: 'insurance', label: 'General liability insurance' }
 ];
@@ -57,7 +57,7 @@ export function documentsFor(relatedId: string, documents: JobDocument[]) {
 export function complianceGaps(contractorId: string, documents: JobDocument[]) {
   const files = documentsFor(contractorId, documents);
   const gaps: string[] = [];
-  REQUIRED.forEach((required) => {
+  REQUIRED_PAPERS.forEach((required) => {
     const matches = files.filter((file) => file.category === required.category);
     if (matches.length === 0) gaps.push(`${required.label} is not on file`);
     else if (matches.every((file) => docState(file) === 'expired')) gaps.push(`${required.label} has expired`);

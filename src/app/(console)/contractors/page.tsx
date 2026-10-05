@@ -132,18 +132,23 @@ export default function ContractorsPage() {
               Trades, coverage, and whether paperwork is current enough to take work. Only active companies with a license and insurance on file can be dispatched.
             </p>
           </div>
-          {canDispatch ? (
-            <div className="flex items-center gap-2">
-              <Link href="/calendar" className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#e6dfd4] bg-white px-4 text-sm font-medium text-ink transition hover:border-[#cfc6b8]">
-                <CalendarClock size={15} />
-                Calendar
-              </Link>
-              <Link href="/dispatch" className="inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-4 text-sm font-semibold text-white transition hover:bg-black">
-                <Waypoints size={15} />
-                Dispatch board
-              </Link>
-            </div>
-          ) : null}
+          <div className="flex items-center gap-2">
+            <Link href="/apply" className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#e6dfd4] bg-white px-4 text-sm font-medium text-ink transition hover:border-[#cfc6b8]">
+              Contractor application
+            </Link>
+            {canDispatch ? (
+              <>
+                <Link href="/calendar" className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#e6dfd4] bg-white px-4 text-sm font-medium text-ink transition hover:border-[#cfc6b8]">
+                  <CalendarClock size={15} />
+                  Calendar
+                </Link>
+                <Link href="/dispatch" className="inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-4 text-sm font-semibold text-white transition hover:bg-black">
+                  <Waypoints size={15} />
+                  Dispatch board
+                </Link>
+              </>
+            ) : null}
+          </div>
         </header>
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

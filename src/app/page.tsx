@@ -1,9 +1,10 @@
 'use client';
 
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { isFieldRole } from '../lib/permissions';
-import { company, sessionUsers } from '../lib/seed';
+import { sessionUsers } from '../lib/seed';
 import { useSession } from '../lib/session';
 import { RoleId, SessionUser } from '../lib/types';
 
@@ -67,7 +68,9 @@ export default function EntryPage() {
 
         <footer className="flex items-center justify-between gap-4 border-t border-[#f0ebe3] pt-5 text-[11px] text-[#b5ada2]">
           <span>© Assign Home Solutions</span>
-          <span>{company.region}</span>
+          <Link href="/apply" className="font-medium text-[#8a8278] hover:text-ink">
+            Apply as a contractor
+          </Link>
         </footer>
       </section>
     </main>

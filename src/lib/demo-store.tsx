@@ -13,7 +13,7 @@ import {
   sops as seededSops,
   workOrders as seededOrders
 } from './seed';
-import { Acknowledgement, Contractor, FileAttachment, JobDocument, JobEvent, JobStatus, Responsibility, RoleId, Sop, WorkOrder } from './types';
+import { Acknowledgement, Contractor, ContractorApplication, FileAttachment, JobDocument, JobEvent, JobStatus, Responsibility, RoleId, Sop, WorkOrder } from './types';
 import { arrivedAt, canAssign, canTake, checklistFor, departedAt, statusMoveDetail } from './workflow';
 
 function stamp() {
@@ -77,6 +77,7 @@ type DemoValue = {
   addPhoto: (workOrderId: string, category: string, actor: string) => void;
   addNote: (workOrderId: string, body: string, actor: string) => void;
   saveScope: (workOrderId: string, scope: string, actor: string) => void;
+  applyContractor: (input: ContractorApplication) => Outcome & { contractorId?: string };
   advanceContractor: (contractorId: string, role: RoleId, actor: string) => Outcome;
   recordDocument: (input: DocumentInput, actor: string) => void;
   addDocument: (input: DocumentInput, actor: string, restricted: boolean) => string;
@@ -421,6 +422,52 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
           verifiedScope: text,
           events: [...(current.events ?? []), event(actor, 'Updated scope', 'Verified scope saved')]
         }));
+      },
+      applyContractor: (input) => {
+        const company = input.company.trim();
+        const contactName = input.contactName.trim();
+        const phone = input.phone.trim();
+        const email = input.email.trim().toLowerCase();
+        const serviceArea = input.serviceArea.trim();
+        const notes = input.notes?.trim();
+        const trades = input.trades;
+        if (!company || !contactName || !phone || !email || !serviceArea) {
+          return { ok: false, reason: 'Company, contact, phone, email, and service area are required' };
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return { ok: false, reason: 'Enter a valid email' };
+        }
+        if (trades.length === 0) {
+          return { ok: false, reason: 'Choose at least one trade' };
+        }
+        const existing = crew.find((item) => item.email.toLowerCase() === email);
+        if (existing) return { ok: true, contractorId: existing.id };
+        const slug = company
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')
+          .slice(0, 24);
+        const contractorId = `c-${slug || 'app'}-${Date.now().toString(36)}`;
+        const record: Contractor = {
+          id: contractorId,
+          company,
+          contactName,
+          phone,
+          email,
+          trades,
+          serviceArea,
+          status: 'application',
+          verification: 'unverified',
+          jobsCompleted: 0,
+          rating: 0,
+          onTimeRate: 0,
+          docCompliance: 0,
+          availability: 'Not yet approved',
+          notes: notes || 'Submitted through the contractor application.',
+          history: [event(contactName, 'Submitted application', `${trades.length} trade${trades.length === 1 ? '' : 's'} · ${serviceArea}`)]
+        };
+        setCrew((current) => [record, ...current]);
+        return { ok: true, contractorId };
       },
       advanceContractor: (contractorId, role, actor) => {
         const contractor = crew.find((item) => item.id === contractorId);
