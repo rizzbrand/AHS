@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { PageHeader } from '../ui/PageHeader';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { PillSelect } from '../ui/DataTable';
 import { useDemo } from '../../lib/demo-store';
-import { TODAY, clockTime, weekdayLabel } from '../../lib/format';
+import { TODAY, clockTime, longDate, weekdayLabel } from '../../lib/format';
 import { SERVICE_LABEL, STATUS_LABEL } from '../../lib/labels';
 import { assigneeLabel, propertyById } from '../../lib/records';
 import { employees } from '../../lib/seed';
@@ -35,6 +36,16 @@ function durationHours(order: WorkOrder) {
   return Math.max(1, Math.round((end - start) / 60));
 }
 
+function byStart(a: WorkOrder, b: WorkOrder) {
+  return (a.scheduledStart ?? '').localeCompare(b.scheduledStart ?? '');
+}
+
+function timeRange(order: WorkOrder) {
+  if (!order.scheduledStart) return '';
+  if (!order.scheduledEnd) return clockTime(order.scheduledStart);
+  return `${clockTime(order.scheduledStart)}–${clockTime(order.scheduledEnd)}`;
+}
+
 export function OpsCalendar() {
   const { orders, contractors } = useDemo();
   const [view, setView] = useState<View>('week');
@@ -46,7 +57,6 @@ export function OpsCalendar() {
 
   const field = employees.filter((employee) => employee.role === 'field');
   const activeContractors = contractors.filter((contractor) => contractor.status === 'active');
-
 
   const filtered = useMemo(() => {
     return orders.filter((order) => {
@@ -62,92 +72,120 @@ export function OpsCalendar() {
 
   const weekStart = Math.max(1, day - ((new Date(2026, 9, day).getDay() + 7) % 7));
   const weekDays = Array.from({ length: 7 }, (_, index) => Math.min(31, weekStart + index)).filter((value, index, arr) => arr.indexOf(value) === index);
+  const weekJobs = filtered.filter((order) => {
+    const value = order.scheduledStart ? dayFromIso(order.scheduledStart) : 0;
+    return value >= weekDays[0] && value <= weekDays[weekDays.length - 1];
+  });
+  const dayJobs = filtered.filter((order) => order.scheduledStart?.startsWith(isoFor(day)));
 
   const monthCells = useMemo(() => {
     const first = new Date(2026, 9, 1).getDay();
     return [...Array.from({ length: first }, () => 0), ...Array.from({ length: 31 }, (_, index) => index + 1)];
   }, []);
 
-  return (
-    <div className="mx-auto max-w-[1400px] space-y-5">
-      <PageHeader
-        kicker="October 2026"
-        title="Calendar"
-        lede="Day, week, and month for jobs that already have a start time. Assign on the dispatch board, then find the crew here."
-        actions={
-          <div className="flex flex-wrap gap-2">
-            {(['day', 'week', 'month'] as View[]).map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setView(item)}
-                className={`h-9 px-3 text-sm capitalize ${view === item ? 'bg-ink text-paper' : 'border border-line bg-surface'}`}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        }
-      />
+  const rangeLabel =
+    view === 'month'
+      ? 'October 2026'
+      : view === 'week'
+        ? `October ${weekDays[0]}–${weekDays[weekDays.length - 1]}, 2026`
+        : longDate(isoFor(day));
 
-      <div className="flex flex-wrap gap-2">
-        <select value={person} onChange={(event) => setPerson(event.target.value)} className="h-9 border border-line bg-surface px-2 text-sm">
-          <option value="all">All people</option>
-          <optgroup label="Field">
+  return (
+    <div className="mx-auto max-w-[1400px] space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9a9187]">Schedule</p>
+          <h1 className="mt-2 font-display text-[2.1rem] leading-none tracking-tight text-ink">Calendar</h1>
+          <p className="mt-3 max-w-xl text-sm text-muted">
+            Jobs that already have a start time. Assign on the dispatch board, then find the crew here.
+          </p>
+        </div>
+        <div className="flex rounded-full bg-[#f6f3ee] p-1">
+          {(['day', 'week', 'month'] as View[]).map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setView(item)}
+              className={`h-9 rounded-full px-4 text-sm capitalize ${view === item ? 'bg-ink font-semibold text-white' : 'text-[#6f6a62] hover:text-ink'}`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <PillSelect value={person} onChange={setPerson} width="w-48">
+            <option value="all">All people</option>
             {field.map((employee) => (
-              <option key={employee.id} value={employee.id}>{employee.name}</option>
+              <option key={employee.id} value={employee.id}>
+                {employee.name}
+              </option>
             ))}
-          </optgroup>
-          <optgroup label="Contractors">
             {activeContractors.map((contractor) => (
-              <option key={contractor.id} value={contractor.id}>{contractor.company}</option>
+              <option key={contractor.id} value={contractor.id}>
+                {contractor.company}
+              </option>
             ))}
-          </optgroup>
-        </select>
-        <select value={service} onChange={(event) => setService(event.target.value as ServiceType | 'all')} className="h-9 border border-line bg-surface px-2 text-sm">
-          <option value="all">All services</option>
-          {Object.entries(SERVICE_LABEL).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-        <select value={state} onChange={(event) => setState(event.target.value as typeof state)} className="h-9 border border-line bg-surface px-2 text-sm">
-          <option value="all">All locations</option>
-          <option value="DC">Washington, DC</option>
-          <option value="MD">Maryland</option>
-          <option value="VA">Virginia</option>
-        </select>
-        <select value={status} onChange={(event) => setStatus(event.target.value as JobStatus | 'all')} className="h-9 border border-line bg-surface px-2 text-sm">
-          <option value="all">All statuses</option>
-          {(['SCHEDULED', 'IN_PROGRESS', 'AWAITING_DOCUMENTATION', 'SUBMITTED_FOR_REVIEW', 'ASSIGNED'] as JobStatus[]).map((item) => (
-            <option key={item} value={item}>{STATUS_LABEL[item]}</option>
-          ))}
-        </select>
+          </PillSelect>
+          <PillSelect value={service} onChange={(value) => setService(value as ServiceType | 'all')} width="w-44">
+            <option value="all">All services</option>
+            {Object.entries(SERVICE_LABEL).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </PillSelect>
+          <PillSelect value={state} onChange={(value) => setState(value as typeof state)} width="w-40">
+            <option value="all">All locations</option>
+            <option value="DC">Washington, DC</option>
+            <option value="MD">Maryland</option>
+            <option value="VA">Virginia</option>
+          </PillSelect>
+          <PillSelect value={status} onChange={(value) => setStatus(value as JobStatus | 'all')} width="w-44">
+            <option value="all">All statuses</option>
+            {(['SCHEDULED', 'IN_PROGRESS', 'AWAITING_DOCUMENTATION', 'SUBMITTED_FOR_REVIEW', 'ASSIGNED'] as JobStatus[]).map((item) => (
+              <option key={item} value={item}>
+                {STATUS_LABEL[item]}
+              </option>
+            ))}
+          </PillSelect>
+        </div>
+
         {view !== 'month' ? (
-          <div className="flex items-center gap-1">
-            <button type="button" className="h-9 border border-line bg-surface px-3 text-sm" onClick={() => setDay((current) => Math.max(1, current - (view === 'week' ? 7 : 1)))}>
-              Prev
-            </button>
-            <button type="button" className="h-9 border border-line bg-surface px-3 text-sm" onClick={() => setDay(dayFromIso(TODAY))}>
-              Today
-            </button>
-            <button type="button" className="h-9 border border-line bg-surface px-3 text-sm" onClick={() => setDay((current) => Math.min(31, current + (view === 'week' ? 7 : 1)))}>
-              Next
-            </button>
+          <div className="flex items-center gap-2">
+            <p className="mr-1 text-sm font-medium text-ink">{rangeLabel}</p>
+            <div className="flex items-center rounded-full border border-[#ece6dc] bg-white p-0.5">
+              <button type="button" aria-label="Previous" className="grid h-8 w-8 place-items-center rounded-full text-ink hover:bg-[#f6f3ee]" onClick={() => setDay((current) => Math.max(1, current - (view === 'week' ? 7 : 1)))}>
+                <ChevronLeft size={16} />
+              </button>
+              <button type="button" className="h-8 rounded-full px-3 text-sm text-[#6f6a62] hover:bg-[#f6f3ee] hover:text-ink" onClick={() => setDay(dayFromIso(TODAY))}>
+                Today
+              </button>
+              <button type="button" aria-label="Next" className="grid h-8 w-8 place-items-center rounded-full text-ink hover:bg-[#f6f3ee]" onClick={() => setDay((current) => Math.min(31, current + (view === 'week' ? 7 : 1)))}>
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
-        ) : null}
+        ) : (
+          <p className="text-sm font-medium text-ink">{rangeLabel}</p>
+        )}
       </div>
 
       {view === 'month' ? (
-        <div className="border border-line bg-surface">
-          <div className="grid grid-cols-7 border-b border-line text-[11px] uppercase tracking-[0.12em] text-muted">
+        <section className="overflow-hidden rounded-2xl border border-[#ece6dc] bg-white">
+          <div className="grid grid-cols-7 border-b border-[#ece6dc] bg-[#faf8f5] text-[11px] font-medium uppercase tracking-[0.14em] text-[#9a9187]">
             {WEEKDAYS.map((label) => (
-              <div key={label} className="px-2 py-2">{label}</div>
+              <div key={label} className="px-3 py-2.5">
+                {label}
+              </div>
             ))}
           </div>
           <div className="grid grid-cols-7">
             {monthCells.map((cell, index) => {
               const iso = cell ? isoFor(cell) : '';
-              const jobs = cell ? filtered.filter((order) => order.scheduledStart?.startsWith(iso)) : [];
+              const jobs = cell ? filtered.filter((order) => order.scheduledStart?.startsWith(iso)).sort(byStart) : [];
               const isToday = iso === TODAY;
               return (
                 <button
@@ -159,47 +197,67 @@ export function OpsCalendar() {
                     setDay(cell);
                     setView('day');
                   }}
-                  className={`min-h-[112px] border-b border-r border-line p-2 text-left ${isToday ? 'bg-copper-soft' : ''} ${cell ? 'hover:bg-paper' : ''}`}
+                  className={`min-h-[124px] border-b border-r border-[#ece6dc] p-2 text-left last:border-r-0 ${cell ? 'hover:bg-[#faf8f5]' : 'bg-[#fcfbf9]'}`}
                 >
-                  {cell ? <p className={`text-xs tabular ${isToday ? 'font-semibold text-copper' : 'text-muted'}`}>{cell}</p> : null}
-                  <ul className="mt-1 space-y-1">
+                  {cell ? (
+                    <span className={`grid h-7 w-7 place-items-center rounded-full text-[13px] tabular ${isToday ? 'bg-ink font-semibold text-white' : 'text-[#6f6a62]'}`}>
+                      {cell}
+                    </span>
+                  ) : null}
+                  <ul className="mt-2 space-y-1">
                     {jobs.slice(0, 3).map((order) => (
-                      <li key={order.id} className="bg-forest px-1.5 py-1 text-[11px] leading-4 text-[#f6f1e8]">
-                        <span className="block font-semibold">{clockTime(order.scheduledStart!)} {order.number}</span>
-                        <span className="block text-[#c5d0c9]">{assigneeLabel(order)}</span>
+                      <li key={order.id}>
+                        <span className="block truncate rounded-lg bg-[#f6f3ee] px-2 py-1 text-[11px] text-ink">
+                          <span className="font-semibold tabular">{order.scheduledStart ? clockTime(order.scheduledStart) : ''}</span>
+                          <span className="ml-1 text-[#6f6a62]">{order.number}</span>
+                        </span>
                       </li>
                     ))}
-                    {jobs.length > 3 ? <li className="text-[11px] text-muted">+{jobs.length - 3} more</li> : null}
+                    {jobs.length > 3 ? <li className="px-1 text-[11px] text-[#9a9187]">+{jobs.length - 3} more</li> : null}
                   </ul>
                 </button>
               );
             })}
           </div>
-        </div>
+        </section>
       ) : null}
 
       {view === 'week' ? (
-        <div className="overflow-x-auto border border-line bg-surface">
-          <div className="min-w-[920px]">
-            <div className="grid grid-cols-[64px_repeat(7,minmax(0,1fr))] border-b border-line">
+        <section className="overflow-x-auto rounded-2xl border border-[#ece6dc] bg-white">
+          <div className="min-w-[960px]">
+            <div className="grid grid-cols-[72px_repeat(7,minmax(0,1fr))] border-b border-[#ece6dc]">
               <div />
-              {weekDays.map((value) => (
-                <button key={value} type="button" onClick={() => { setDay(value); setView('day'); }} className={`border-l border-line px-2 py-2 text-left ${isoFor(value) === TODAY ? 'bg-copper-soft' : ''}`}>
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted">{WEEKDAYS[new Date(2026, 9, value).getDay()]}</p>
-                  <p className="text-sm font-semibold">{value}</p>
-                </button>
-              ))}
+              {weekDays.map((value) => {
+                const today = isoFor(value) === TODAY;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setDay(value);
+                      setView('day');
+                    }}
+                    className="border-l border-[#ece6dc] px-3 py-3 text-left hover:bg-[#faf8f5]"
+                  >
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-[#9a9187]">{WEEKDAYS[new Date(2026, 9, value).getDay()]}</p>
+                    <p className={`mt-1 grid h-8 w-8 place-items-center rounded-full text-sm tabular ${today ? 'bg-ink font-semibold text-white' : 'font-semibold text-ink'}`}>
+                      {value}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
-            <div className="grid grid-cols-[64px_repeat(7,minmax(0,1fr))]">
+            <div className="grid grid-cols-[72px_repeat(7,minmax(0,1fr))]">
               {HOURS.map((hour) => (
                 <div key={hour} className="contents">
-                  <div className="border-b border-line px-2 py-3 text-right text-[11px] tabular text-muted">{hour}:00</div>
+                  <div className="border-b border-[#ece6dc] px-3 py-3 text-right text-[11px] tabular text-[#9a9187]">{hour}:00</div>
                   {weekDays.map((value) => {
-                    const jobs = filtered.filter((order) => order.scheduledStart?.startsWith(isoFor(value)) && hourFromIso(order.scheduledStart) === hour);
+                    const jobs = filtered.filter((order) => order.scheduledStart?.startsWith(isoFor(value)) && hourFromIso(order.scheduledStart) === hour).sort(byStart);
+                    const today = isoFor(value) === TODAY;
                     return (
-                      <div key={`${value}-${hour}`} className="min-h-[72px] border-b border-l border-line p-1">
+                      <div key={`${value}-${hour}`} className={`min-h-[76px] space-y-1.5 border-b border-l border-[#ece6dc] p-1.5 ${today ? 'bg-[#faf8f5]' : ''}`}>
                         {jobs.map((order) => (
-                          <JobBlock key={order.id} order={order} compact />
+                          <JobChip key={order.id} order={order} compact />
                         ))}
                       </div>
                     );
@@ -208,62 +266,81 @@ export function OpsCalendar() {
               ))}
             </div>
           </div>
-        </div>
+        </section>
       ) : null}
 
       {view === 'day' ? (
-        <div className="border border-line bg-surface">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
+        <section className="overflow-hidden rounded-2xl border border-[#ece6dc] bg-white">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#ece6dc] px-5 py-4">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.14em] text-copper">{weekdayLabel(isoFor(day))}</p>
-              <h2 className="text-sm font-semibold">{filtered.filter((order) => order.scheduledStart?.startsWith(isoFor(day))).length} jobs on the board</h2>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[#9a9187]">{weekdayLabel(isoFor(day))}</p>
+              <h2 className="mt-1 text-sm font-semibold text-ink">
+                {dayJobs.length} job{dayJobs.length === 1 ? '' : 's'} on the board
+              </h2>
             </div>
-            <Link href="/dispatch" className="text-sm font-semibold text-copper">Open dispatch</Link>
+            <Link href="/dispatch" className="text-sm font-medium text-ink underline-offset-4 hover:underline">
+              Open dispatch
+            </Link>
           </div>
           <div className="grid grid-cols-[72px_minmax(0,1fr)]">
             {HOURS.map((hour) => {
-              const jobs = filtered.filter((order) => order.scheduledStart?.startsWith(isoFor(day)) && hourFromIso(order.scheduledStart) === hour);
+              const jobs = dayJobs.filter((order) => hourFromIso(order.scheduledStart) === hour).sort(byStart);
               return (
                 <div key={hour} className="contents">
-                  <div className="border-b border-line px-2 py-4 text-right text-[11px] tabular text-muted">{hour}:00</div>
-                  <div className="min-h-[88px] border-b border-l border-line p-2">
-                    {jobs.length === 0 ? null : (
-                      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-                        {jobs.map((order) => (
-                          <JobBlock key={order.id} order={order} />
-                        ))}
-                      </div>
-                    )}
+                  <div className="border-b border-[#ece6dc] px-3 py-4 text-right text-[11px] tabular text-[#9a9187]">{hour}:00</div>
+                  <div className="min-h-[92px] space-y-2 border-b border-l border-[#ece6dc] p-2.5">
+                    {jobs.map((order) => (
+                      <JobChip key={order.id} order={order} />
+                    ))}
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
       ) : null}
 
-      <p className="text-xs text-muted">{filtered.length} scheduled jobs match these filters · duration shown where an end time exists</p>
+      <p className="text-[12px] text-[#9a9187]">
+        {view === 'week' ? `${weekJobs.length} jobs this week` : view === 'day' ? `${dayJobs.length} jobs on this day` : `${filtered.length} scheduled jobs`}
+        {' · '}
+        {filtered.length} match the filters
+      </p>
     </div>
   );
 }
 
-function JobBlock({ order, compact }: { order: WorkOrder; compact?: boolean }) {
+function JobChip({ order, compact = false }: { order: WorkOrder; compact?: boolean }) {
   const property = propertyById(order.propertyId);
   const hours = durationHours(order);
+
+  if (compact) {
+    return (
+      <Link href={`/work-orders/${order.id}`} className="block rounded-xl border border-[#ece6dc] bg-white px-2 py-1.5 hover:border-[#cfc6b8]">
+        <span className="block text-[11px] font-semibold tabular text-ink">{timeRange(order)}</span>
+        <span className="mt-0.5 block truncate text-[11px] text-[#4a443d]">{order.number}</span>
+        <span className="block truncate text-[11px] text-[#9a9187]">{assigneeLabel(order)}</span>
+      </Link>
+    );
+  }
+
   return (
     <Link
       href={`/work-orders/${order.id}`}
-      className={`block bg-forest text-[#f6f1e8] ${compact ? 'px-1.5 py-1 text-[11px] leading-4' : 'px-3 py-2 text-sm'}`}
-      style={compact ? undefined : { minHeight: `${Math.max(56, hours * 28)}px` }}
+      className="block rounded-2xl border border-[#ece6dc] bg-[#faf8f5] px-4 py-3 hover:border-[#cfc6b8] hover:bg-white"
+      style={{ minHeight: `${Math.max(72, hours * 22)}px` }}
     >
-      <span className="block font-semibold">
-        {order.scheduledStart ? clockTime(order.scheduledStart) : ''}
-        {order.scheduledEnd ? `–${clockTime(order.scheduledEnd)}` : ''} {order.number}
-      </span>
-      <span className={`block ${compact ? 'text-[#c5d0c9]' : 'mt-1 text-[#d5ddd8]'}`}>
-        {SERVICE_LABEL[order.service]} · {assigneeLabel(order)}
-      </span>
-      {!compact ? <span className="mt-1 block text-xs text-[#b7c2bb]">{property?.city}, {property?.state}</span> : null}
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-semibold tabular text-ink">{timeRange(order)}</p>
+        <p className="text-[12px] font-medium text-[#6f6a62]">{order.number}</p>
+      </div>
+      <p className="mt-1 text-sm text-[#4a443d]">
+        {SERVICE_LABEL[order.service]}
+        <span className="text-[#9a9187]"> · {assigneeLabel(order)}</span>
+      </p>
+      <p className="mt-1 text-[12px] text-[#9a9187]">
+        {property?.name}
+        {property ? ` · ${property.city}, ${property.state}` : ''}
+      </p>
     </Link>
   );
 }

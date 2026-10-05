@@ -20,12 +20,19 @@ import {
 } from 'lucide-react';
 import { Permission } from '../../lib/types';
 
+export type NavChild = {
+  href: string;
+  label: string;
+  permission?: Permission;
+};
+
 export type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
   permission: Permission;
   group: 'Operate' | 'Directory' | 'Commercial' | 'Control';
+  children?: NavChild[];
 };
 
 export const NAV: NavItem[] = [
@@ -41,7 +48,14 @@ export const NAV: NavItem[] = [
   { href: '/playbook', label: 'SOPs / Playbook', icon: BookOpen, permission: 'playbook.read', group: 'Directory' },
   { href: '/estimates', label: 'Quotes & Estimates', icon: FileSpreadsheet, permission: 'estimates.read', group: 'Commercial' },
   { href: '/invoices', label: 'Invoices', icon: Receipt, permission: 'invoices.read', group: 'Commercial' },
-  { href: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports.read', group: 'Commercial' },
+  {
+    href: '/reports',
+    label: 'Reports',
+    icon: BarChart3,
+    permission: 'reports.read',
+    group: 'Commercial',
+    children: [{ href: '/reports?view=money', label: 'Money', permission: 'reports.financial' }]
+  },
   { href: '/automations', label: 'Automations', icon: Workflow, permission: 'automations.read', group: 'Control' },
   { href: '/integrations', label: 'Integrations', icon: Plug, permission: 'integrations.read', group: 'Control' },
   { href: '/audit', label: 'Audit Log', icon: ScrollText, permission: 'audit.read', group: 'Control' },

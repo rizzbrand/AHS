@@ -29,7 +29,7 @@ export function RoleMenu({ tone, variant, collapsed = false }: { tone?: 'paper' 
           title={collapsed ? `${user.name} · switch demo role` : undefined}
           className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-shell-hover ${collapsed ? 'justify-center' : ''}`}
         >
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber text-[11px] font-semibold text-ink">{user.initials}</span>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[11px] font-semibold text-ink">{user.initials}</span>
           {collapsed ? null : (
             <>
               <span className="min-w-0 flex-1">
@@ -45,7 +45,7 @@ export function RoleMenu({ tone, variant, collapsed = false }: { tone?: 'paper' 
           type="button"
           onClick={() => setOpen((current) => !current)}
           aria-label={`${user.name}, switch demo role`}
-          className="grid h-9 w-9 place-items-center rounded-full bg-amber text-[11px] font-semibold text-ink ring-2 ring-white transition hover:bg-amber-deep"
+          className="grid h-9 w-9 place-items-center rounded-full bg-ink text-[11px] font-semibold text-white ring-2 ring-white transition hover:bg-[#2a2622]"
         >
           {user.initials}
         </button>
@@ -86,7 +86,7 @@ export function RoleMenu({ tone, variant, collapsed = false }: { tone?: 'paper' 
                         router.push(isFieldRole(person.role) ? fieldHome(pathname) : can(person.role, 'overview.read') ? '/overview' : '/playbook');
                       }}
                     >
-                      <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[10px] font-semibold ${current ? 'bg-amber text-ink' : 'bg-[#ece7df] text-[#5e574e]'}`}>
+                      <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[10px] font-semibold ${current ? 'bg-ink text-white' : 'bg-[#ece7df] text-[#5e574e]'}`}>
                         {person.initials}
                       </span>
                       <span className="min-w-0 flex-1">

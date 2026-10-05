@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ArrowUpRight, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen, Smartphone, X, type LucideIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { ArrowUpRight, ChevronDown, LifeBuoy, Menu, PanelLeftClose, PanelLeftOpen, Smartphone, X, type LucideIcon } from 'lucide-react';
 import { useDemo } from '../../lib/demo-store';
 import { can } from '../../lib/permissions';
 import { ackState, personKey, requiredSops } from '../../lib/playbook';
@@ -26,6 +27,7 @@ export function Sidebar({
   onCloseMobile: () => void;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useSession();
   const { orders, documents, sops, acks } = useDemo();
   const items = NAV.filter((item) => user && can(user.role, item.permission) && !HIDDEN.has(item.href));
@@ -35,8 +37,6 @@ export function Sidebar({
     '/work-orders': user && can(user.role, 'jobs.read') ? attentionFor(orders, documents).length : 0,
     '/playbook': user && me ? requiredSops(user.role, sops).filter((sop) => ackState(me, sop, acks) !== 'current').length : 0
   };
-
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <>
@@ -48,7 +48,7 @@ export function Sidebar({
       >
         <div className={`flex h-16 shrink-0 items-center ${collapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
           <Link href={user && can(user.role, 'overview.read') ? '/overview' : '/playbook'} className="flex items-center gap-3" onClick={onCloseMobile}>
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-amber text-[11px] font-bold text-ink">AH</span>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-[11px] font-bold text-ink">AH</span>
             {collapsed ? null : <span className="text-[13px] font-semibold uppercase tracking-[0.28em] text-shell-ink">Assign Home</span>}
           </Link>
           {collapsed ? null : (
@@ -67,15 +67,7 @@ export function Sidebar({
           <button type="button" className="mx-auto mb-2 hidden rounded-md p-1.5 text-shell-faint hover:bg-shell-hover hover:text-shell-ink md:block" onClick={onToggle} aria-label="Expand sidebar">
             <PanelLeftOpen size={16} />
           </button>
-        ) : (
-          <div className="mx-4 mb-2 flex items-center gap-3 rounded-xl border border-shell-line bg-shell-raised px-3 py-2.5">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-shell-tile text-[11px] font-semibold text-shell-ink">AH</span>
-            <span className="min-w-0">
-              <span className="block truncate text-[13px] font-semibold text-shell-ink">Assign Home Solutions</span>
-              <span className="block truncate text-[11px] text-shell-muted">General contracting · DMV</span>
-            </span>
-          </div>
-        )}
+        ) : null}
 
         <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 py-2">
           {user && can(user.role, 'field.access') ? (
@@ -94,7 +86,14 @@ export function Sidebar({
                 <ul className="space-y-0.5">
                   {groupItems.map((item) => (
                     <li key={item.href}>
-                      <NavLink item={item} active={isActive(item.href)} badge={badges[item.href]} collapsed={collapsed} onClick={onCloseMobile} />
+                      <NavItemRow
+                        item={item}
+                        pathname={pathname}
+                        search={searchParams.toString()}
+                        badge={badges[item.href]}
+                        collapsed={collapsed}
+                        onClick={onCloseMobile}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -134,6 +133,94 @@ export function Sidebar({
   );
 }
 
+function childIsActive(href: string, pathname: string, search: string) {
+  const url = new URL(href, 'http://local.invalid');
+  if (pathname !== url.pathname) return false;
+  const wanted = url.searchParams.get('view');
+  const current = new URLSearchParams(search).get('view');
+  return (wanted ?? null) === (current ?? null);
+}
+
+function NavItemRow({
+  item,
+  pathname,
+  search,
+  badge = 0,
+  collapsed,
+  onClick
+}: {
+  item: NavItem;
+  pathname: string;
+  search: string;
+  badge?: number;
+  collapsed: boolean;
+  onClick: () => void;
+}) {
+  const { user } = useSession();
+  const children = (item.children ?? []).filter((child) => !child.permission || (user && can(user.role, child.permission)));
+  const sectionActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const [open, setOpen] = useState(sectionActive);
+
+  useEffect(() => {
+    if (sectionActive) setOpen(true);
+  }, [sectionActive]);
+
+  if (collapsed || children.length === 0) {
+    return <NavLink item={item} active={sectionActive} badge={badge} collapsed={collapsed} onClick={onClick} />;
+  }
+
+  return (
+    <div>
+      <div
+        className={`relative flex items-center rounded-xl text-[13px] transition ${
+          sectionActive ? 'bg-white font-semibold text-ink' : 'text-shell-text hover:bg-shell-hover hover:text-shell-ink'
+        }`}
+      >
+        <Link href={item.href} title={item.label} onClick={onClick} aria-current={sectionActive ? 'page' : undefined} className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2">
+          <item.icon size={16} strokeWidth={sectionActive ? 2 : 1.75} className="shrink-0" />
+          <span className="truncate">{item.label}</span>
+        </Link>
+        {badge > 0 ? (
+          <span className={`mr-1 grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-bold tabular ${sectionActive ? 'bg-ink/15 text-ink' : 'bg-white text-ink'}`}>
+            {badge}
+          </span>
+        ) : null}
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={`${open ? 'Collapse' : 'Expand'} ${item.label}`}
+          onClick={() => setOpen((current) => !current)}
+          className={`mr-1 grid h-7 w-7 place-items-center rounded-lg ${sectionActive ? 'text-ink hover:bg-black/5' : 'text-shell-faint hover:bg-shell-hover hover:text-shell-ink'}`}
+        >
+          <ChevronDown size={14} className={`transition ${open ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+      {open ? (
+        <ul className="mt-0.5 space-y-0.5 pl-4">
+          {children.map((child) => {
+            const active = childIsActive(child.href, pathname, search);
+            return (
+              <li key={child.href}>
+                <Link
+                  href={child.href}
+                  onClick={onClick}
+                  aria-current={active ? 'page' : undefined}
+                  className={`flex items-center rounded-xl px-3 py-1.5 text-[12px] transition ${
+                    active ? 'font-semibold text-shell-ink' : 'text-shell-muted hover:bg-shell-hover hover:text-shell-ink'
+                  }`}
+                >
+                  <span className={`mr-2 h-1.5 w-1.5 rounded-full ${active ? 'bg-white' : 'bg-shell-line'}`} />
+                  {child.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function NavLink({
   item,
   active,
@@ -157,17 +244,17 @@ function NavLink({
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
       className={`relative flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] transition ${collapsed ? 'justify-center' : ''} ${
-        active ? 'bg-amber font-semibold text-ink shadow-[0_6px_18px_rgba(217,160,91,0.25)]' : 'text-shell-text hover:bg-shell-hover hover:text-shell-ink'
+        active ? 'bg-white font-semibold text-ink' : 'text-shell-text hover:bg-shell-hover hover:text-shell-ink'
       } ${className}`}
     >
       <Icon size={16} strokeWidth={active ? 2 : 1.75} className="shrink-0" />
       {collapsed ? null : <span className="flex-1 truncate">{item.label}</span>}
       {badge > 0 ? (
         collapsed ? (
-          <span className="absolute right-3 top-2 h-2 w-2 rounded-full bg-amber ring-2 ring-shell" />
+          <span className="absolute right-3 top-2 h-2 w-2 rounded-full bg-white ring-2 ring-shell" />
         ) : (
           <span
-            className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-bold tabular ${active ? 'bg-ink/15 text-ink' : 'bg-amber text-ink'}`}
+            className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-bold tabular ${active ? 'bg-ink/15 text-ink' : 'bg-white text-ink'}`}
           >
             {badge}
           </span>
