@@ -132,7 +132,7 @@ export function ResponsibilityMap() {
                       <p className="mt-1 text-[13px] leading-5 text-[#6f6a62]">{duty.description}</p>
                       <p className="mt-1 text-[12px] text-[#9a9187]">{duty.cadence}</p>
                     </div>
-                    <dl className="grid min-w-0 flex-1 grid-cols-3 gap-3">
+                    <dl className="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
                       <Seat label="Owner" id={duty.ownerId} />
                       <Seat label="Backup" id={duty.backupId} empty="None" />
                       <Seat label="Approver" id={duty.approverId} empty="—" />

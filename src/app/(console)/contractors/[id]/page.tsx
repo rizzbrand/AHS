@@ -138,7 +138,7 @@ export default function ContractorProfilePage() {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           <Panel title="Contact and internal notes" lede="Internal to Assign Home. Not shared with customers.">
-            <dl className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-2 p-4 text-sm">
+            <dl className="grid gap-x-4 gap-y-2 p-4 text-sm sm:grid-cols-[120px_1fr]">
               <dt className="text-muted">Contact</dt>
               <dd>{contractor.contactName}</dd>
               <dt className="text-muted">Phone</dt>
@@ -221,7 +221,7 @@ export default function ContractorProfilePage() {
                   <option value="certification">Certification</option>
                 </select>
               </label>
-              <label className="grid min-w-[220px] flex-1 gap-1">
+              <label className="grid min-w-0 flex-1 gap-1 sm:min-w-[220px]">
                 <span className="text-[11px] uppercase tracking-[0.12em] text-muted">Name</span>
                 <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Certificate of insurance, 2026–27" className="border border-line bg-surface px-2 py-1.5" />
               </label>

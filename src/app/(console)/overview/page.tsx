@@ -325,7 +325,7 @@ function Pipeline({ orders }: { orders: WorkOrder[] }) {
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#f0ebe3] px-5 py-4">
       <p className="text-[12px] font-medium text-[#8a8278]">Book of work by stage</p>
-      <div className="flex h-2.5 min-w-[220px] flex-1 overflow-hidden rounded-full bg-[#f3efe6]">
+      <div className="flex h-2.5 min-w-0 w-full flex-1 overflow-hidden rounded-full bg-[#f3efe6] sm:min-w-[220px]">
         {counts.map((stage) =>
           stage.count ? (
             <span

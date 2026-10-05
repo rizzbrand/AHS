@@ -134,10 +134,10 @@ export function DispatchBoard() {
 
       <section className="flex flex-wrap items-end gap-3 rounded-2xl border border-[#ece6dc] bg-white px-5 py-4">
         <FilterField label="Search">
-          <PillSearch value={query} onChange={setQuery} placeholder="Job, city, person…" width="w-64" />
+          <PillSearch value={query} onChange={setQuery} placeholder="Job, city, person…" width="w-full sm:w-64" />
         </FilterField>
         <FilterField label="Service">
-          <PillSelect value={service} onChange={(value) => setService(value as ServiceType | 'all')} width="w-44">
+          <PillSelect value={service} onChange={(value) => setService(value as ServiceType | 'all')} width="w-full sm:w-44">
             <option value="all">All services</option>
             {Object.entries(SERVICE_LABEL).map(([value, label]) => (
               <option key={value} value={value}>
@@ -159,7 +159,11 @@ export function DispatchBoard() {
           </button>
         ) : null}
         <p className="ml-auto max-w-sm text-right text-[12px] leading-5 text-[#8a8278]">
-          {dragging ? 'Drop the job on a person to assign and schedule it.' : selectedAssignable ? 'Job selected. Assign it from a person card, or drag it over.' : 'Drag a job onto a person, or select a card first.'}
+          {dragging
+            ? 'Drop the job on a person to assign and schedule it.'
+            : selectedAssignable
+              ? 'Job selected. Click a person in the middle column to assign it.'
+              : 'Click a job on the left or today, then click a person to assign it.'}
         </p>
       </section>
 
@@ -177,7 +181,7 @@ export function DispatchBoard() {
               key={order.id}
               order={order}
               selected={selected === order.id}
-              draggable={canAssign(order.status)}
+              draggable
               dragging={dragging === order.id}
               onSelect={() => setSelected((current) => (current === order.id ? null : order.id))}
               onDragStart={() => setDragging(order.id)}
@@ -223,10 +227,12 @@ export function DispatchBoard() {
           ) : null}
         </Column>
 
-        <Column title="People" count={workers.length} lede="Field crew and eligible contractors" active={dragging !== null} dim={false}>
-          {selected && !selectedAssignable ? (
-            <p className="rounded-xl bg-[#faf8f5] px-3 py-2 text-[12px] text-[#8a8278]">This job is still in intake or scoping, so it cannot be assigned yet.</p>
-          ) : null}
+        <Column title="People" count={workers.length} lede="Field crew and eligible contractors" active={dragging !== null || selectedAssignable} dim={false}>
+          {selectedAssignable ? (
+            <p className="rounded-xl bg-[#faf8f5] px-3 py-2 text-[12px] text-ink">Click a person to assign {orders.find((item) => item.id === selected)?.number}.</p>
+          ) : (
+            <p className="rounded-xl bg-[#faf8f5] px-3 py-2 text-[12px] text-[#8a8278]">Select a job first, then click someone here.</p>
+          )}
           <ul className="space-y-2.5">
             {workers.map((worker) => {
               const load = loadFor(worker.id);
@@ -234,6 +240,9 @@ export function DispatchBoard() {
               return (
                 <li
                   key={worker.id}
+                  onClick={() => {
+                    if (selectedAssignable && selected) openSchedule(selected, worker.id);
+                  }}
                   onDragOver={(event) => {
                     event.preventDefault();
                     setDropTarget(worker.id);
@@ -246,7 +255,13 @@ export function DispatchBoard() {
                     openSchedule(orderId, worker.id);
                   }}
                   className={`rounded-2xl border p-3.5 transition ${
-                    active ? 'border-amber bg-amber/10 ring-2 ring-amber/40' : dragging ? 'border-dashed border-[#d9cfc0] bg-white' : 'border-[#ece6dc] bg-white'
+                    active
+                      ? 'border-amber bg-amber/10 ring-2 ring-amber/40'
+                      : selectedAssignable
+                        ? 'cursor-pointer border-[#ece6dc] bg-white hover:border-ink'
+                        : dragging
+                          ? 'border-dashed border-[#d9cfc0] bg-white'
+                          : 'border-[#ece6dc] bg-white'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -300,7 +315,20 @@ export function DispatchBoard() {
           <Column title="Today" count={today.length} lede="Jobs with a start time" active={lane === 'today'} dim={lane === 'unassigned' || lane === 'needsTime'}>
             {today.length === 0 ? <Empty>Nothing scheduled for today.</Empty> : null}
             {today.map((order) => (
-              <JobCard key={order.id} order={order} selected={selected === order.id} onSelect={() => setSelected((current) => (current === order.id ? null : order.id))} showTime />
+              <JobCard
+                key={order.id}
+                order={order}
+                selected={selected === order.id}
+                draggable
+                dragging={dragging === order.id}
+                onSelect={() => setSelected((current) => (current === order.id ? null : order.id))}
+                onDragStart={() => setDragging(order.id)}
+                onDragEnd={() => {
+                  setDragging(null);
+                  setDropTarget(null);
+                }}
+                showTime
+              />
             ))}
           </Column>
           <Column title="Past due" count={overdue.length} lede="Still open and late" active={lane === 'late'} dim={lane === 'unassigned' || lane === 'needsTime' || lane === 'today'}>
@@ -341,8 +369,8 @@ export function DispatchBoard() {
       ) : null}
 
       {modal && modalOrder && modalWorker ? (
-        <div className="fixed inset-0 z-40 grid place-items-center bg-ink/30 p-4 backdrop-blur-[2px]" onMouseDown={() => setModal(null)}>
-          <div role="dialog" aria-label="Schedule assignment" className="w-full max-w-md overflow-hidden rounded-[22px] bg-white shadow-sheet" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="fixed inset-0 z-40 grid place-items-end bg-ink/30 p-0 backdrop-blur-[2px] sm:place-items-center sm:p-4" onMouseDown={() => setModal(null)}>
+          <div role="dialog" aria-label="Schedule assignment" className="w-full max-w-md overflow-hidden rounded-t-[22px] bg-white shadow-sheet sm:rounded-[22px]" onMouseDown={(event) => event.stopPropagation()}>
             <div className="flex items-start justify-between gap-3 border-b border-[#f0ebe3] px-5 py-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9a9187]">Schedule assignment</p>
@@ -358,14 +386,14 @@ export function DispatchBoard() {
             <div className="space-y-3 px-5 py-5">
               <label className="block">
                 <span className="mb-1.5 block text-xs font-medium text-[#8a8278]">Start</span>
-                <input type="datetime-local" value={when} onChange={(event) => setWhen(event.target.value)} className="h-10 w-full rounded-xl border border-[#e6dfd4] bg-white px-3 text-sm outline-none focus:border-amber" />
+                <input type="datetime-local" value={when} onChange={(event) => setWhen(event.target.value)} className="h-10 w-full min-w-0 rounded-xl border border-[#e6dfd4] bg-white px-3 text-sm outline-none focus:border-amber" />
               </label>
               <label className="block">
                 <span className="mb-1.5 block text-xs font-medium text-[#8a8278]">Duration (hours)</span>
                 <input type="number" min={1} max={10} value={hours} onChange={(event) => setHours(Number(event.target.value) || 3)} className="h-10 w-full rounded-xl border border-[#e6dfd4] bg-white px-3 text-sm outline-none focus:border-amber" />
               </label>
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-[#f0ebe3] bg-[#faf8f5] px-5 py-3">
+            <div className="flex items-center justify-end gap-2 border-t border-[#f0ebe3] bg-[#faf8f5] px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <button type="button" onClick={() => setModal(null)} className="h-10 rounded-xl border border-[#e6dfd4] bg-white px-4 text-sm font-medium text-ink hover:border-[#cfc6b8]">
                 Cancel
               </button>

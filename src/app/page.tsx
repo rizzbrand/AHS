@@ -29,7 +29,7 @@ export default function EntryPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/25" />
         <div className="absolute left-6 top-6 flex items-center gap-2.5 text-white sm:left-8 sm:top-8">
           <span className="grid h-8 w-8 place-items-center rounded-full bg-white text-[10px] font-bold text-ink">AH</span>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.22em]">Assign Home Solutions</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.22em]">Assign Home Solutions</span>
         </div>
         <div className="absolute bottom-6 left-6 text-white sm:bottom-8 sm:left-8">
           <p className="font-display text-2xl tracking-tight">Assign Home Solutions</p>
@@ -37,7 +37,7 @@ export default function EntryPage() {
         </div>
       </section>
 
-      <section className="flex flex-col justify-between px-6 py-8 sm:px-12 lg:px-16 lg:py-10">
+      <section className="flex flex-col justify-between px-6 py-8 sm:px-12 lg:overflow-y-auto lg:px-16 lg:py-10">
         <header>
           <p className="text-[13px] font-medium text-ink">Assign Home Solutions</p>
           <p className="mt-0.5 text-[12px] text-[#9a9187]">Operations platform</p>

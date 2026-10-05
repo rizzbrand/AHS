@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { PillSelect } from '../ui/DataTable';
 import { useDemo } from '../../lib/demo-store';
@@ -55,6 +55,10 @@ export function OpsCalendar() {
   const [state, setState] = useState<'all' | 'DC' | 'MD' | 'VA'>('all');
   const [status, setStatus] = useState<JobStatus | 'all'>('all');
 
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 767px)').matches) setView('day');
+  }, []);
+
   const field = employees.filter((employee) => employee.role === 'field');
   const activeContractors = contractors.filter((contractor) => contractor.status === 'active');
 
@@ -100,13 +104,13 @@ export function OpsCalendar() {
             Jobs that already have a start time. Assign on the dispatch board, then find the crew here.
           </p>
         </div>
-        <div className="flex rounded-full bg-[#f6f3ee] p-1">
+        <div className="flex w-full rounded-full bg-[#f6f3ee] p-1 sm:w-auto">
           {(['day', 'week', 'month'] as View[]).map((item) => (
             <button
               key={item}
               type="button"
               onClick={() => setView(item)}
-              className={`h-9 rounded-full px-4 text-sm capitalize ${view === item ? 'bg-ink font-semibold text-white' : 'text-[#6f6a62] hover:text-ink'}`}
+              className={`h-9 flex-1 rounded-full px-3 text-sm capitalize sm:flex-none sm:px-4 ${view === item ? 'bg-ink font-semibold text-white' : 'text-[#6f6a62] hover:text-ink'}`}
             >
               {item}
             </button>
@@ -116,7 +120,7 @@ export function OpsCalendar() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <PillSelect value={person} onChange={setPerson} width="w-48">
+          <PillSelect value={person} onChange={setPerson} width="w-full sm:w-48">
             <option value="all">All people</option>
             {field.map((employee) => (
               <option key={employee.id} value={employee.id}>
@@ -129,7 +133,7 @@ export function OpsCalendar() {
               </option>
             ))}
           </PillSelect>
-          <PillSelect value={service} onChange={(value) => setService(value as ServiceType | 'all')} width="w-44">
+          <PillSelect value={service} onChange={(value) => setService(value as ServiceType | 'all')} width="w-full sm:w-44">
             <option value="all">All services</option>
             {Object.entries(SERVICE_LABEL).map(([value, label]) => (
               <option key={value} value={value}>
@@ -137,13 +141,13 @@ export function OpsCalendar() {
               </option>
             ))}
           </PillSelect>
-          <PillSelect value={state} onChange={(value) => setState(value as typeof state)} width="w-40">
+          <PillSelect value={state} onChange={(value) => setState(value as typeof state)} width="w-full sm:w-40">
             <option value="all">All locations</option>
             <option value="DC">Washington, DC</option>
             <option value="MD">Maryland</option>
             <option value="VA">Virginia</option>
           </PillSelect>
-          <PillSelect value={status} onChange={(value) => setStatus(value as JobStatus | 'all')} width="w-44">
+          <PillSelect value={status} onChange={(value) => setStatus(value as JobStatus | 'all')} width="w-full sm:w-44">
             <option value="all">All statuses</option>
             {(['SCHEDULED', 'IN_PROGRESS', 'AWAITING_DOCUMENTATION', 'SUBMITTED_FOR_REVIEW', 'ASSIGNED'] as JobStatus[]).map((item) => (
               <option key={item} value={item}>
@@ -175,10 +179,11 @@ export function OpsCalendar() {
 
       {view === 'month' ? (
         <section className="overflow-hidden rounded-2xl border border-[#ece6dc] bg-white">
-          <div className="grid grid-cols-7 border-b border-[#ece6dc] bg-[#faf8f5] text-[11px] font-medium uppercase tracking-[0.14em] text-[#9a9187]">
+          <div className="grid grid-cols-7 border-b border-[#ece6dc] bg-[#faf8f5] text-[10px] font-medium uppercase tracking-[0.08em] text-[#9a9187] sm:text-[11px] sm:tracking-[0.14em]">
             {WEEKDAYS.map((label) => (
-              <div key={label} className="px-3 py-2.5">
-                {label}
+              <div key={label} className="px-1 py-2 text-center sm:px-3 sm:py-2.5 sm:text-left">
+                <span className="sm:hidden">{label[0]}</span>
+                <span className="hidden sm:inline">{label}</span>
               </div>
             ))}
           </div>
@@ -197,14 +202,23 @@ export function OpsCalendar() {
                     setDay(cell);
                     setView('day');
                   }}
-                  className={`min-h-[124px] border-b border-r border-[#ece6dc] p-2 text-left last:border-r-0 ${cell ? 'hover:bg-[#faf8f5]' : 'bg-[#fcfbf9]'}`}
+                  className={`min-h-[76px] border-b border-r border-[#ece6dc] p-1.5 text-left last:border-r-0 sm:min-h-[124px] sm:p-2 ${cell ? 'hover:bg-[#faf8f5]' : 'bg-[#fcfbf9]'}`}
                 >
                   {cell ? (
-                    <span className={`grid h-7 w-7 place-items-center rounded-full text-[13px] tabular ${isToday ? 'bg-ink font-semibold text-white' : 'text-[#6f6a62]'}`}>
-                      {cell}
-                    </span>
+                    <>
+                      <span className={`grid h-7 w-7 place-items-center rounded-full text-[13px] tabular ${isToday ? 'bg-ink font-semibold text-white' : 'text-[#6f6a62]'}`}>
+                        {cell}
+                      </span>
+                      {jobs.length > 0 ? (
+                        <span className="mt-1.5 flex items-center gap-0.5 sm:hidden">
+                          {jobs.slice(0, 3).map((order) => (
+                            <span key={order.id} className="h-1.5 w-1.5 rounded-full bg-ink" />
+                          ))}
+                        </span>
+                      ) : null}
+                    </>
                   ) : null}
-                  <ul className="mt-2 space-y-1">
+                  <ul className="mt-1 hidden space-y-1 sm:mt-2 sm:block">
                     {jobs.slice(0, 3).map((order) => (
                       <li key={order.id}>
                         <span className="block truncate rounded-lg bg-[#f6f3ee] px-2 py-1 text-[11px] text-ink">

@@ -36,7 +36,20 @@ const NEXT: Partial<Record<JobStatus, Transition[]>> = {
   INVOICED: [{ to: 'CLOSED', label: 'Close job', roles: ['owner'] }]
 };
 
-const ASSIGNABLE: JobStatus[] = ['APPROVED', 'READY_FOR_DISPATCH', 'ASSIGNED', 'SCHEDULED', 'IN_PROGRESS', 'AWAITING_DOCUMENTATION'];
+const ASSIGNABLE: JobStatus[] = [
+  'NEW',
+  'REVIEW',
+  'INSPECTION_REQUIRED',
+  'INSPECTION_COMPLETE',
+  'ESTIMATE_PREPARING',
+  'AWAITING_APPROVAL',
+  'APPROVED',
+  'READY_FOR_DISPATCH',
+  'ASSIGNED',
+  'SCHEDULED',
+  'IN_PROGRESS',
+  'AWAITING_DOCUMENTATION'
+];
 
 const CHECKLISTS: Record<ServiceType, string[]> = {
   door_repair: ['Identify the failed part', 'Complete the repair', 'Cycle the door'],

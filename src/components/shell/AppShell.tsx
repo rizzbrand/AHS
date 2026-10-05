@@ -43,6 +43,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    setMobileOpen(false);
+    setNoticesOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     if (!ready || !user) return;
     if (isFieldRole(user.role) && !pathname.startsWith('/field')) {
       router.replace(fieldHome(pathname));
@@ -68,11 +73,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-shell md:py-3 md:pr-3">
+    <div className="flex h-[100dvh] overflow-hidden bg-shell md:py-3 md:pr-3">
       <Sidebar collapsed={collapsed} mobileOpen={mobileOpen} onToggle={toggleCollapsed} onCloseMobile={() => setMobileOpen(false)} />
       <div className="console-canvas flex min-w-0 flex-1 flex-col overflow-hidden bg-white md:rounded-[22px] md:shadow-canvas">
-        <header className="z-20 flex h-16 shrink-0 items-center gap-3 border-b border-[#f0ebe3] px-4 md:px-8">
+        <header className="z-20 flex h-14 shrink-0 items-center gap-2 border-b border-[#f0ebe3] px-3 sm:h-16 sm:gap-3 sm:px-4 md:px-8">
           <MenuButton onClick={() => setMobileOpen(true)} />
+          <p className="min-w-0 flex-1 truncate text-[15px] font-semibold text-ink md:hidden">{crumbs[crumbs.length - 1]?.label ?? 'Assign Home'}</p>
           <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center truncate text-[13px] text-[#9a9187] md:flex">
             <span>{company.name.replace(' Solutions', '')}</span>
             {crumbs.map((crumb, index) => {
@@ -91,7 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -115,7 +121,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {noticesOpen ? (
                 <>
                   <button type="button" aria-label="Close notifications" className="fixed inset-0 z-40 cursor-default" onClick={() => setNoticesOpen(false)} />
-                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-line bg-surface shadow-sheet">
+                  <div className="fixed inset-x-3 top-[4.25rem] z-50 max-h-[min(70dvh,28rem)] overflow-y-auto rounded-xl border border-line bg-surface shadow-sheet sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80">
                     <p className="border-b border-line px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Needs a look</p>
                     <ul>
                       {notices.map((notice) => (
@@ -133,7 +139,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <RoleMenu variant="avatar" />
           </div>
         </header>
-        <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">{children}</main>
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-5 md:px-8 md:py-8">{children}</main>
       </div>
       <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>

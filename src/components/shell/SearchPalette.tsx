@@ -68,7 +68,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-[#1c1915]/40 px-4 pt-[12vh]" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-[#1c1915]/40 px-3 pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-4 sm:pt-[12vh]" onMouseDown={onClose}>
       <div className="w-full max-w-xl border border-line bg-surface shadow-sheet" onMouseDown={(event) => event.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-line px-4">
           <Search size={16} className="text-muted" />

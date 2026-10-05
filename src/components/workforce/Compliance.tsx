@@ -33,7 +33,7 @@ export function OnboardingStepper({ status }: { status: ContractorStatus }) {
         return (
           <li key={stage} className="min-w-0">
             <div className={`h-1.5 ${done ? 'bg-forest' : here ? 'bg-copper' : 'bg-line'}`} />
-            <p className={`mt-2 truncate text-[11px] uppercase tracking-[0.08em] ${here ? 'font-semibold text-ink' : done ? 'text-ink' : 'text-muted'}`}>
+            <p className={`mt-2 truncate text-[9px] uppercase tracking-[0.06em] sm:text-[11px] sm:tracking-[0.08em] ${here ? 'font-semibold text-ink' : done ? 'text-ink' : 'text-muted'}`}>
               {CONTRACTOR_STATUS_LABEL[stage]}
             </p>
           </li>

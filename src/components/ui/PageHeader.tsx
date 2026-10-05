@@ -13,7 +13,7 @@ export function PageHeader({
     <header className="flex flex-wrap items-end justify-between gap-4 pb-2">
       <div className="max-w-2xl">
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9a9187]">{kicker}</p>
-        <h1 className="mt-2 font-display text-[2.1rem] font-medium leading-none tracking-[-0.03em] text-ink">{title}</h1>
+        <h1 className="mt-2 font-display text-[2.1rem] font-medium leading-none tracking-tight text-ink">{title}</h1>
         {lede ? <p className="mt-3 text-sm leading-6 text-muted">{lede}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}

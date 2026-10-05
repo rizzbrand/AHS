@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import { DemoStoreProvider } from '../lib/demo-store';
 import { SessionProvider } from '../lib/session';
@@ -10,6 +10,12 @@ const display = Outfit({ subsets: ['latin'], variable: '--font-display', display
 export const metadata: Metadata = {
   title: 'Assign Home Solutions · Operations',
   description: 'Internal operations platform for Assign Home Solutions.'
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover'
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -28,7 +28,7 @@ export default function FieldLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-[#e9e4dc] md:py-6">
-      <div className="mx-auto flex h-[100dvh] max-w-md flex-col overflow-hidden bg-[#f7f5f1] md:h-[calc(100vh-3rem)] md:rounded-[30px] md:border-[6px] md:border-shell md:shadow-canvas">
+      <div className="mx-auto flex h-[100dvh] max-w-md flex-col overflow-hidden bg-[#f7f5f1] md:h-[calc(100dvh-3rem)] md:rounded-[30px] md:border-[6px] md:border-shell md:shadow-canvas">
         <header className="flex shrink-0 items-center justify-between bg-shell px-5 py-3.5">
           <Link href="/field" className="flex items-center gap-2.5">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-amber text-[11px] font-bold text-ink">AH</span>

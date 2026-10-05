@@ -67,7 +67,7 @@ export function RoleMenu({ tone, variant, collapsed = false }: { tone?: 'paper' 
         <>
           <button type="button" aria-label="Close menu" className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} />
           <div
-            className={`absolute z-50 w-64 overflow-hidden rounded-xl border border-line bg-surface text-ink shadow-sheet ${
+            className={`absolute z-50 w-[min(16rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-line bg-surface text-ink shadow-sheet ${
               upward ? `bottom-full mb-2 ${collapsed ? 'left-0' : 'left-0 right-0 w-auto'}` : 'right-0 mt-2'
             }`}
           >

@@ -31,7 +31,7 @@ export default function AutomationsPage() {
 
         <HandoffNote>The photo rule is reflected in the work-order record. The other rules are specified, not executing.</HandoffNote>
 
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Stat icon={<Workflow size={16} />} label="Rules on file" value={automations.length} note="Specified for this company" active={view === 'all'} onClick={() => setView('all')} />
           <Stat icon={<PlayCircle size={16} />} label="Visible in the demo" value={live.length} note="You can see this rule on jobs" active={view === 'active_in_demo'} onClick={() => setView('active_in_demo')} />
           <Stat icon={<Workflow size={16} />} label="Designed only" value={designed.length} note="Not executing yet" active={view === 'designed'} onClick={() => setView('designed')} />

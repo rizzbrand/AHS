@@ -1055,7 +1055,7 @@ function StageStepper({ status }: { status: JobStatus }) {
   const closed = status === "CLOSED";
   return (
     <section className={`${card} mt-6 px-5 py-4`}>
-      <ol className="grid grid-cols-5 gap-2">
+      <ol className="grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-2">
         {STAGES.map((stage, index) => {
           const done = index < stageIndex || closed;
           const current = index === stageIndex && !closed;

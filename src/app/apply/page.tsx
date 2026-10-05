@@ -72,15 +72,15 @@ export default function ApplyPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-black/25" />
         <div className="absolute left-6 top-6 flex items-center gap-2.5 text-white sm:left-8 sm:top-8">
           <span className="grid h-8 w-8 place-items-center rounded-full bg-white text-[10px] font-bold text-ink">AH</span>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.22em]">Assign Home Solutions</span>
+          <span className="max-w-[70%] text-[11px] font-semibold uppercase tracking-[0.14em] sm:tracking-[0.22em]">Assign Home Solutions</span>
         </div>
-        <div className="absolute bottom-6 left-6 max-w-sm text-white sm:bottom-8 sm:left-8">
+        <div className="absolute bottom-5 left-5 max-w-[calc(100%-2.5rem)] text-white sm:bottom-8 sm:left-8 sm:max-w-sm">
           <p className="font-display text-2xl tracking-tight">Join the contractor roster</p>
           <p className="mt-1 text-sm text-white/70">License and insurance come next. Dispatch opens after operations approves you.</p>
         </div>
       </section>
 
-      <section className="flex flex-col overflow-y-auto px-6 py-8 sm:px-12 lg:px-16 lg:py-10">
+      <section className="flex flex-col justify-between overflow-y-auto px-6 py-8 sm:px-12 lg:px-16 lg:py-10">
         <header className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[13px] font-medium text-ink">{company.name}</p>

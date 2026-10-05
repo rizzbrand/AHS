@@ -71,16 +71,16 @@ export function PhotoProgress({ order }: { order: WorkOrder }) {
 
 export function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block">
+    <label className="block w-full min-w-0 sm:w-auto">
       <span className="mb-1.5 block pl-1 text-[12px] font-medium text-[#8a8278]">{label}</span>
       {children}
     </label>
   );
 }
 
-export function PillSearch({ value, onChange, placeholder, width = 'w-56' }: { value: string; onChange: (value: string) => void; placeholder: string; width?: string }) {
+export function PillSearch({ value, onChange, placeholder, width = 'w-full sm:w-56' }: { value: string; onChange: (value: string) => void; placeholder: string; width?: string }) {
   return (
-    <div className="relative">
+    <div className="relative w-full min-w-0 sm:w-auto">
       <Search size={14} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9a9187]" />
       <input
         value={value}
@@ -92,9 +92,9 @@ export function PillSearch({ value, onChange, placeholder, width = 'w-56' }: { v
   );
 }
 
-export function PillSelect({ value, onChange, children, width = 'w-44' }: { value: string; onChange: (value: string) => void; children: React.ReactNode; width?: string }) {
+export function PillSelect({ value, onChange, children, width = 'w-full sm:w-44' }: { value: string; onChange: (value: string) => void; children: React.ReactNode; width?: string }) {
   return (
-    <div className="relative">
+    <div className="relative w-full min-w-0 sm:w-auto">
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -110,7 +110,7 @@ export function PillSelect({ value, onChange, children, width = 'w-44' }: { valu
 export function Pagination({ page, pages, onChange }: { page: number; pages: number; onChange: (page: number) => void }) {
   const base = 'grid h-9 min-w-9 place-items-center rounded-full px-2 text-sm tabular transition';
   return (
-    <nav aria-label="Pagination" className="flex items-center gap-1.5">
+    <nav aria-label="Pagination" className="flex flex-wrap items-center gap-1.5">
       <button type="button" disabled={page === 1} onClick={() => onChange(page - 1)} aria-label="Previous page" className={`${base} text-ink hover:bg-[#f3efe6] disabled:opacity-30`}>
         <ChevronLeft size={16} />
       </button>

@@ -173,7 +173,7 @@ export function Stacked({ slices }: { slices: Slice[] }) {
 
 export function ChartCard({ title, lede, children, wide }: { title: string; lede?: string; children: ReactNode; wide?: boolean }) {
   return (
-    <section className={`rounded-2xl border border-[#ece6dc] bg-white p-5 ${wide ? 'lg:col-span-2' : ''}`}>
+    <section className={`overflow-x-auto rounded-2xl border border-[#ece6dc] bg-white p-5 ${wide ? 'lg:col-span-2' : ''}`}>
       <h2 className="text-sm font-semibold text-ink">{title}</h2>
       {lede ? <p className="mt-0.5 text-[12px] text-[#8a8278]">{lede}</p> : null}
       <div className="mt-4">{children}</div>

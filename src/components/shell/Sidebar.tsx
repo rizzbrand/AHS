@@ -42,9 +42,9 @@ export function Sidebar({
     <>
       {mobileOpen ? <button aria-label="Close menu" className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={onCloseMobile} /> : null}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex shrink-0 flex-col bg-shell text-shell-ink transition-[width,transform] duration-200 md:static md:h-full ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[min(264px,88vw)] shrink-0 flex-col bg-shell text-shell-ink transition-[width,transform] duration-200 md:static md:h-full ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        } ${collapsed ? 'w-[84px]' : 'w-[264px]'}`}
+        } ${collapsed ? 'md:w-[84px]' : 'md:w-[264px]'}`}
       >
         <div className={`flex h-16 shrink-0 items-center ${collapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
           <Link href={user && can(user.role, 'overview.read') ? '/overview' : '/playbook'} className="flex items-center gap-3" onClick={onCloseMobile}>
@@ -102,7 +102,7 @@ export function Sidebar({
           })}
         </nav>
 
-        <div className="shrink-0 px-3 pb-3">
+        <div className="shrink-0 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="border-t border-shell-line pt-2">
             {user && can(user.role, 'playbook.read') ? (
               <Link
